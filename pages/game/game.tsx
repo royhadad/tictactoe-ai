@@ -1,12 +1,14 @@
 import createClasses from './style';
 import Square from "./Square";
-import {createContext, useState} from "react";
+import {createContext, Dispatch, SetStateAction, useState} from "react";
 import {
     Board,
     Square as SquareState,
     SquareLocation,
     TicTacToeState
 } from "generic-min-max/dist/implementations/TicTacToe";
+import {Box, Grid, Typography} from "@material-ui/core";
+import cloneDeep from 'lodash/cloneDeep';
 
 export type OnClickSquare = (squareLocation: SquareLocation) => void;
 const onClickSquareDefaultValue: OnClickSquare = (squareLocation => {
@@ -27,49 +29,105 @@ const getNewGame = (): TicTacToeState => ({
     board: getEmptyBoard()
 })
 
-export const GameContext = createContext<{ gameState: TicTacToeState, onClickSquare: OnClickSquare }>({
+interface GameContextType {
+    gameState: TicTacToeState;
+    setGameState: Dispatch<SetStateAction<TicTacToeState>>;
+    onClickSquare: OnClickSquare;
+    isHumanTurn: boolean;
+    setIsHumanTurn: Dispatch<SetStateAction<boolean>>;
+};
+const GameContextDefaultValue = {
     gameState: getNewGame(),
-    onClickSquare: onClickSquareDefaultValue
-});
+    setGameState: () => undefined,
+    onClickSquare: onClickSquareDefaultValue,
+    isHumanTurn: true,
+    setIsHumanTurn: () => undefined
+}
 
+export const GameContext = createContext<GameContextType>(GameContextDefaultValue);
 
 function Game() {
     const classes = createClasses();
 
-    const [gameState, setGameState] = useState(getNewGame());
+    const [gameState, setGameState] = useState<TicTacToeState>(getNewGame());
+    const [isHumanTurn, setIsHumanTurn] = useState<boolean>(true);
 
-    const onClickSquare: OnClickSquare = () => {
+    const onClickSquare: OnClickSquare = (squareLocation) => {
+        // Filter out invalid moves
+        if (!isHumanTurn || getSquareStateByLocation(gameState, squareLocation) !== SquareState.Empty) {
+            return;
+        }
 
+        const gameStateDeepClone = cloneDeep<TicTacToeState>(gameState);
+
+        gameStateDeepClone.board[squareLocation[0]][squareLocation[1]] = gameStateDeepClone.player1Turn ? (SquareState.X) : (SquareState.O);
+        gameStateDeepClone.player1Turn = !gameStateDeepClone.player1Turn;
+
+        setGameState(gameStateDeepClone);
+        setIsHumanTurn((prevState) => !prevState);
     }
 
 
     return (
         <GameContext.Provider
             value={{
-                gameState: gameState,
-                onClickSquare
+                gameState,
+                setGameState,
+                onClickSquare,
+                isHumanTurn,
+                setIsHumanTurn
             }}
         >
-            <div>
-                <div className={classes.wrapper}>this is the tic tac toe game</div>
-                <div>
-                    <div>
-                        <Square location={[0, 0]}/>
-                        <Square location={[0, 1]}/>
-                        <Square location={[0, 2]}/>
-                    </div>
-                    <div>
-                        <Square location={[1, 0]}/>
-                        <Square location={[1, 1]}/>
-                        <Square location={[1, 2]}/>
-                    </div>
-                    <div>
-                        <Square location={[2, 0]}/>
-                        <Square location={[2, 1]}/>
-                        <Square location={[2, 2]}/>
-                    </div>
-                </div>
-            </div>
+            <Grid container direction='column' alignItems='center'>
+                <Box mb={20} className={classes.wrapper}>
+                    <Typography variant='h1' color='primary'>
+                        This is the Tic-tac-toe game
+                    </Typography>
+                </Box>
+                <Grid item>
+                    <Grid container direction='column'>
+                        <Grid item>
+                            <Grid container direction='row'>
+                                <Grid item>
+                                    <Square location={[0, 0]}/>
+                                </Grid>
+                                <Grid item>
+                                    <Square location={[0, 1]}/>
+                                </Grid>
+                                <Grid item>
+                                    <Square location={[0, 2]}/>
+                                </Grid>
+                            </Grid>
+                        </Grid>
+                        <Grid item>
+                            <Grid container direction='row'>
+                                <Grid item>
+                                    <Square location={[1, 0]}/>
+                                </Grid>
+                                <Grid item>
+                                    <Square location={[1, 1]}/>
+                                </Grid>
+                                <Grid item>
+                                    <Square location={[1, 2]}/>
+                                </Grid>
+                            </Grid>
+                        </Grid>
+                        <Grid item>
+                            <Grid container direction='row'>
+                                <Grid item>
+                                    <Square location={[2, 0]}/>
+                                </Grid>
+                                <Grid item>
+                                    <Square location={[2, 1]}/>
+                                </Grid>
+                                <Grid item>
+                                    <Square location={[2, 2]}/>
+                                </Grid>
+                            </Grid>
+                        </Grid>
+                    </Grid>
+                </Grid>
+            </Grid>
         </GameContext.Provider>)
 }
 
