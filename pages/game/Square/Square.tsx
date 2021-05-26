@@ -1,8 +1,9 @@
 import React from "react";
 import createClasses from './style';
 import {OnClickSquare} from "../game";
-
+import TicTacToeGame, {TicTacToeState} from 'generic-min-max/dist/implementations/TicTacToe'
 interface Props {
+    state: TicTacToeState["board"][0][0];
     row: number;
     column: number;
     onClick: OnClickSquare
