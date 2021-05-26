@@ -1,10 +1,14 @@
 import createClasses from './style';
-import Square from "./Square/Square";
+import Square from "./Square";
+import {useState} from "react";
+import {SquareLocation} from "generic-min-max/dist/implementations/TicTacToe";
 
-export type OnClickSquare = (row: number, column: number) => void;
+export type OnClickSquare = (squareLocation: SquareLocation) => void;
 
 function Game() {
     const classes = createClasses();
+
+    const gameState = useState()
 
     const onClickSquare: OnClickSquare = () => {
 
@@ -15,18 +19,19 @@ function Game() {
             <div className={classes.wrapper}>this is the tic tac toe game</div>
             <div>
                 <div>
-                    <Square onClick={onClickSquare} row={0} column={0}/>
-                    <Square onClick={onClickSquare} row={0} column={1}/>
-                    <Square onClick={onClickSquare} row={0} column={2}/>
+                    <Square onClick={onClickSquare} location={[0, 0]} state={}/>
+                    <Square onClick={onClickSquare} location={[0, 1]}/>
+                    <Square onClick={onClickSquare} location={[0, 2]}/>
                 </div>
                 <div>
-                    <Square onClick={onClickSquare} row={1} column={0}/>
-                    <Square onClick={onClickSquare} row={1} column={1}/>
-                    <Square onClick={onClickSquare} row={1} column={2}/>
+                    <Square onClick={onClickSquare} location={[1, 0]}/>
+                    <Square onClick={onClickSquare} location={[1, 1]}/>
+                    <Square onClick={onClickSquare} location={[1, 2]}/>
                 </div>
-                <div><Square onClick={onClickSquare} row={2} column={0}/>
-                    <Square onClick={onClickSquare} row={2} column={1}/>
-                    <Square onClick={onClickSquare} row={2} column={2}/>
+                <div>
+                    <Square onClick={onClickSquare} location={[2, 0]}/>
+                    <Square onClick={onClickSquare} location={[2, 1]}/>
+                    <Square onClick={onClickSquare} location={[2, 2]}/>
                 </div>
             </div>
         </div>)
