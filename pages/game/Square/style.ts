@@ -5,6 +5,7 @@ export default makeStyles(() => ({
         backgroundColor: 'green',
         border: '5px solid blue',
         width: '50px',
-        height: '50px'
+        height: '50px',
+        fontSize: '80%'
     }
 }));

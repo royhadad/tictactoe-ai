@@ -2,7 +2,7 @@ import React, {useContext} from "react";
 import createClasses from './style';
 import {GameContext, getSquareStateByLocation} from "../game";
 import {Square as SquareStates, SquareLocation} from 'generic-min-max/dist/implementations/TicTacToe'
-import noop from 'lodash/noop';
+import {Grid} from "@material-ui/core";
 
 interface Props {
     location: SquareLocation;
@@ -24,12 +24,15 @@ const Square: React.FC<Props> = (props: Props) => {
     const squareState = getSquareStateByLocation(gameState, props.location);
 
     return (
-        <div
-            onClick={squareState === SquareStates.Empty ? () => onClickSquare(props.location) : noop}
+        <Grid
+            onClick={() => onClickSquare(props.location)}
             className={classes.wrapper}
+            container
+            alignItems='center'
+            justify='center'
         >
             {getSquareContent(squareState)}
-        </div>
+        </Grid>
     )
 }
 

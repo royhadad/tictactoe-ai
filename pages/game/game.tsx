@@ -1,14 +1,20 @@
 import createClasses from './style';
 import Square from "./Square";
 import {createContext, Dispatch, SetStateAction, useState} from "react";
-import {
+import TicTacToeGame, {
     Board,
     Square as SquareState,
     SquareLocation,
     TicTacToeState
 } from "generic-min-max/dist/implementations/TicTacToe";
 import {Box, Grid, Typography} from "@material-ui/core";
-import cloneDeep from 'lodash/cloneDeep';
+import {minMax} from "generic-min-max";
+
+const cloneDeep = require('lodash/cloneDeep')
+
+const x = {a: 2};
+const y = cloneDeep(x)
+console.log('y', y) // TODO: remove log
 
 export type OnClickSquare = (squareLocation: SquareLocation) => void;
 const onClickSquareDefaultValue: OnClickSquare = (squareLocation => {
@@ -51,6 +57,7 @@ function Game() {
 
     const [gameState, setGameState] = useState<TicTacToeState>(getNewGame());
     const [isHumanTurn, setIsHumanTurn] = useState<boolean>(true);
+    const [isComputerThinking, setIsComputerThinking] = useState<boolean>(false);
 
     const onClickSquare: OnClickSquare = (squareLocation) => {
         // Filter out invalid moves
@@ -58,15 +65,23 @@ function Game() {
             return;
         }
 
-        const gameStateDeepClone = cloneDeep<TicTacToeState>(gameState);
+        const nextGameState = cloneDeep(gameState);
 
-        gameStateDeepClone.board[squareLocation[0]][squareLocation[1]] = gameStateDeepClone.player1Turn ? (SquareState.X) : (SquareState.O);
-        gameStateDeepClone.player1Turn = !gameStateDeepClone.player1Turn;
+        nextGameState.board[squareLocation[0]][squareLocation[1]] = gameState.player1Turn ? (SquareState.X) : (SquareState.O);
+        nextGameState.player1Turn = !gameState.player1Turn;
 
-        setGameState(gameStateDeepClone);
+        setGameState(nextGameState);
         setIsHumanTurn((prevState) => !prevState);
-    }
+        setIsComputerThinking(false);
 
+        // make computer move
+        const ticTacToeGame = new TicTacToeGame(nextGameState);
+        const continuation = minMax(ticTacToeGame, 9);
+
+        setGameState(continuation.state);
+        setIsHumanTurn(false);
+        setIsComputerThinking(false);
+    }
 
     return (
         <GameContext.Provider
@@ -79,11 +94,20 @@ function Game() {
             }}
         >
             <Grid container direction='column' alignItems='center'>
-                <Box mb={20} className={classes.wrapper}>
-                    <Typography variant='h1' color='primary'>
-                        This is the Tic-tac-toe game
-                    </Typography>
-                </Box>
+                <Grid item>
+                    <Box mb={20} className={classes.wrapper}>
+                        <Typography variant='h1' color='primary'>
+                            This is the Tic-tac-toe game
+                        </Typography>
+                    </Box>
+                </Grid>
+                <Grid item>
+                    <Box mb={10}>
+                        <Typography variant='h3' color='secondary'>
+                            {isComputerThinking && 'Computer thinking...'}
+                        </Typography>
+                    </Box>
+                </Grid>
                 <Grid item>
                     <Grid container direction='column'>
                         <Grid item>
