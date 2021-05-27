@@ -10,11 +10,11 @@ import TicTacToeGame, {
 import {Box, Grid, Typography} from "@material-ui/core";
 import {minMax} from "generic-min-max";
 
-const cloneDeep = require('lodash/cloneDeep')
+const _ = require('lodash');
 
 const x = {a: 2};
-const y = cloneDeep(x)
-console.log('y', y) // TODO: remove log
+const y = _.cloneDeep(x)
+console.log('yaadsaassdasfa', y) // TODO: remove log
 
 export type OnClickSquare = (squareLocation: SquareLocation) => void;
 const onClickSquareDefaultValue: OnClickSquare = (squareLocation => {
@@ -65,7 +65,7 @@ function Game() {
             return;
         }
 
-        const nextGameState = cloneDeep(gameState);
+        const nextGameState = _.cloneDeep(gameState);
 
         nextGameState.board[squareLocation[0]][squareLocation[1]] = gameState.player1Turn ? (SquareState.X) : (SquareState.O);
         nextGameState.player1Turn = !gameState.player1Turn;
