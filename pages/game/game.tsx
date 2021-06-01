@@ -1,6 +1,6 @@
 import createClasses from './style';
 import Square from "./Square";
-import {createContext, Dispatch, SetStateAction, useState} from "react";
+import {createContext, Dispatch, SetStateAction, useCallback, useEffect, useRef, useState} from "react";
 import TicTacToeGame, {
     Board,
     Square as SquareState,
@@ -9,12 +9,8 @@ import TicTacToeGame, {
 } from "generic-min-max/dist/implementations/TicTacToe";
 import {Box, Grid, Typography} from "@material-ui/core";
 import {minMax} from "generic-min-max";
-
-const _ = require('lodash');
-
-const x = {a: 2};
-const y = _.cloneDeep(x)
-console.log('yaadsaassdasfa', y) // TODO: remove log
+import cloneDeep from 'lodash/cloneDeep';
+import isRunningOnClient from "../../src/utils/isRunningOnClient";
 
 export type OnClickSquare = (squareLocation: SquareLocation) => void;
 const onClickSquareDefaultValue: OnClickSquare = (squareLocation => {
@@ -41,7 +37,8 @@ interface GameContextType {
     onClickSquare: OnClickSquare;
     isHumanTurn: boolean;
     setIsHumanTurn: Dispatch<SetStateAction<boolean>>;
-};
+}
+
 const GameContextDefaultValue = {
     gameState: getNewGame(),
     setGameState: () => undefined,
@@ -52,12 +49,38 @@ const GameContextDefaultValue = {
 
 export const GameContext = createContext<GameContextType>(GameContextDefaultValue);
 
+let webWorker: Worker | undefined;
+
+
 function Game() {
+    const workerRef = useRef<Worker>()
+    useEffect(() => {
+        workerRef.current = new Worker('../../worker.js', {type: 'module'})
+        workerRef.current.onmessage = (evt) =>
+            alert(`WebWorker Response => ${evt.data}`)
+        return () => {
+            workerRef?.current?.terminate()
+        }
+    }, [])
+
+    const handleWork = useCallback(async () => {
+        workerRef?.current?.postMessage(100000)
+    }, [])
+
+
     const classes = createClasses();
 
     const [gameState, setGameState] = useState<TicTacToeState>(getNewGame());
     const [isHumanTurn, setIsHumanTurn] = useState<boolean>(true);
     const [isComputerThinking, setIsComputerThinking] = useState<boolean>(false);
+
+
+    useEffect(() => {
+        if (isRunningOnClient()) {
+            // webWorker = new Worker('./webWorker.js')
+            // webWorker.postMessage('7')
+        }
+    }, [])
 
     const onClickSquare: OnClickSquare = (squareLocation) => {
         // Filter out invalid moves
@@ -65,7 +88,7 @@ function Game() {
             return;
         }
 
-        const nextGameState = _.cloneDeep(gameState);
+        const nextGameState = cloneDeep(gameState);
 
         nextGameState.board[squareLocation[0]][squareLocation[1]] = gameState.player1Turn ? (SquareState.X) : (SquareState.O);
         nextGameState.player1Turn = !gameState.player1Turn;
@@ -93,6 +116,7 @@ function Game() {
                 setIsHumanTurn
             }}
         >
+            <Grid onClick={handleWork}>Click For work!</Grid>
             <Grid container direction='column' alignItems='center'>
                 <Grid item>
                     <Box mb={20} className={classes.wrapper}>
