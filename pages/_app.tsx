@@ -1,9 +1,17 @@
 import '../styles/globals.css'
 import type {AppProps} from 'next/app'
+import React from "react";
+import Head from "next/head";
 
 function MyApp({Component, pageProps}: AppProps) {
-  return <Component {...pageProps} />
+    return (
+        <>
+            <Head>
+                <title>Tic-tac-toe</title>
+            </Head>
+            <Component {...pageProps} />
+        </>
+    )
 }
 
-// eslint-disable-next-line
 export default MyApp;
